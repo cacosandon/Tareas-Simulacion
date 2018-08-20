@@ -1,6 +1,7 @@
 from random import expovariate
 from collections import deque
 from datetime import timedelta, datetime
+from time import clock
 
 
 class Supermercado:
@@ -38,9 +39,8 @@ class Supermercado:
         return f'Hay {buscando_productos} persona(s) buscando sus productos.\n' \
                f'Colas: {cantidad_colas}\n'
 
-
     def simular(self):
-
+        tiempo1 = clock()
         while self.hora_actual < self.hora_final:
 
             self.llegadas_cola = [cliente.hora_ingresocola for cliente in self.clientes]+[datetime(2018, 8, 11, 1, 0, 0)]
@@ -73,7 +73,7 @@ class Supermercado:
 
                         if len(self.colas[s]) != 0:
 
-                            #print(f"Tiempo de espera de cliente atendido en caja {s+1} recientemente: {self.hora_actual - self.colas[s][0].hora_ingresocola_estadistica}")
+                            # print(f"Tiempo de espera de cliente atendido en caja {s+1} recientemente: {self.hora_actual - self.colas[s][0].hora_ingresocola_estadistica}")
 
                             self.espera_de_clientes.append((self.hora_actual - self.colas[s][0].hora_ingresocola_estadistica))
                             h = expovariate(1/5)
@@ -111,8 +111,8 @@ class Supermercado:
 
                         break
                     m += 1
-
-
+        tiempo2 = clock()
+        return tiempo2-tiempo1
 
     def espera_promedio(self):
         lista = []
@@ -124,10 +124,12 @@ class Supermercado:
         return sum(lista)/len(lista)
 
     def __str__(self):
-        self.simular()
+        tiempo = self.simular()
         mins = int(self.espera_promedio())
         sec = (self.espera_promedio()) % 1 * 60
-        return f"El tiempo de espera promedio fue de {mins} minutos y {sec} segundos."
+        return f"El tiempo de espera promedio fue de {mins} minutos y {sec} " \
+               f"segundos.\n" \
+               f"Se demoró {tiempo} segundos."
 
 
 class Cliente:
@@ -146,4 +148,3 @@ class Cliente:
 
 prueba = Supermercado(16)
 print(prueba)
-print(len(prueba.clientes))
