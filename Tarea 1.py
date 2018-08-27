@@ -16,7 +16,7 @@ class Supermercado:
         self.proxima_llegada = self.hora_actual + timedelta(minutes=int(m), seconds=int(m % 1 * 60))
         self.clientes = []
         self.llegadas_cola = [datetime(2018, 8, 11, 1, 0, 0)]
-        self.proximas_atenciones = [datetime(2018,8,11,1,0,0) for x in range(cajas)]
+        self.proximas_atenciones = [datetime(2018,8,11,1,0,0) for _ in range(cajas)]
         self.espera_de_clientes = []
 
     def cola_mas_corta(self):

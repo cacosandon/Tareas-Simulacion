@@ -2,6 +2,7 @@ from random import uniform, seed, randint
 from collections import deque
 from time import clock
 from math import log
+import numpy as np
 
 
 class Supermercado:
@@ -43,9 +44,8 @@ class Supermercado:
     def simular(self):
         tiempo1 = clock()
         self.proximas_atenciones = [3000]*self.cajas
-        
+
         while self.hora_actual < self.hora_final:
-            
             self.llegadas_cola = [cliente.hora_ingresocola for
                                   cliente in self.clientes]+[3000]
 
@@ -73,24 +73,19 @@ class Supermercado:
                 # de la caja {s+1}")
 
                 self.colas[s].popleft()
-                
 
                 if len(self.colas[s]) != 0:
 
-                    #print(f"Tiempo de espera de cliente atendido
+                    #  print(f"Tiempo de espera de cliente atendido
                     # en caja {s+1} recientemente: {self.hora_actual -
                     # self.colas[s][0].hora_ingresocola_estadistica}")
-                    self.espera_de_clientes.append\
-                          ((self.hora_actual -
-                           self.colas[s][0].hora_ingresocola_estadistica))
+                    self.espera_de_clientes.append((self.hora_actual -
+                                                    self.colas[s][0].hora_ingresocola_estadistica))
+                    self.colas[s][0].espera = self.hora_actual - self.colas[s][0].hora_ingresocola_estadistica
                     h = (-5)*log(1 - uniform(0, 1))
-
                     self.proximas_atenciones[s] = self.hora_actual + h
                 else:
                     self.proximas_atenciones[s] = 3000
-                        
-                        
-                    
 
             elif self.hora_actual == min(self.llegadas_cola):
                 m = self.llegadas_cola.index(min(self.llegadas_cola))
@@ -109,7 +104,7 @@ class Supermercado:
                 if len(self.colas[n]) == 1:
                     h = (-5) * log(1 - uniform(0, 1))
 
-                    # print("Se agrega un tiempo 0 a la lista de esperas por no haber nadie en cola.")
+                    #print("Se agrega un tiempo 0 a la lista de esperas por no haber nadie en cola.")
 
                     self.espera_de_clientes.append(0)
                     self.proximas_atenciones[n] = \
@@ -117,18 +112,30 @@ class Supermercado:
                     #print(f"Proxima atencion de caja {n}: {h} minutos")
 
         tiempo2 = clock()
-        return tiempo2-tiempo1
+        promedio = self.espera_promedio()
+        return (tiempo2-tiempo1), promedio
 
     def espera_promedio(self):
         suma = 0
-        for tiempo in self.espera_de_clientes:
-            suma += tiempo
-        return suma/len(self.espera_de_clientes)
+        contador = 1
+        for cliente in self.clientes:
+            suma += cliente.espera
+            contador += 1
+        return suma/len(self.clientes)
+
+    def percentil_90(self):
+        lista = []
+        for cliente in self.clientes:
+            lista.append(cliente.espera)
+            lista.sort()
+            lista_np = np.array(lista)
+            p = np.percentile(lista_np, 90)
+        return p
 
     def __str__(self):
-        tiempo = self.simular()
-        mins = int(self.espera_promedio())
-        sec = (self.espera_promedio()) % 1 * 60
+        tiempo, promedio = self.simular()
+        mins = int(promedio)
+        sec = promedio % 1 * 60
         return f"El tiempo de espera promedio fue de {mins} minutos y {sec} " \
                f"segundos.\n" \
                f"Se demoró {tiempo} segundos."
@@ -146,7 +153,15 @@ class Cliente:
         self.hora_ingresocola = self.hora_llegada + m
         self.hora_ingresocola_estadistica = self.hora_ingresocola
         self.hora_salida = False
+        self.espera = 0
+
+    def __str__(self):
+        return f"ID: {self.id}, HLL: {self.hora_llegada}, HIC: {self.hora_ingresocola_estadistica}, " \
+               f"Espera : {self.espera}"
+
 
 sim = Supermercado(16)
-print(sim)
+print(sim.simular()[0])
+print(sim.espera_promedio())
+print(sim.percentil_90())
 
