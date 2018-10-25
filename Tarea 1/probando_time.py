@@ -5,6 +5,7 @@ from math import log
 import numpy as np
 
 
+
 class Supermercado:
     def __init__(self, cajas):
         self.cajas = cajas

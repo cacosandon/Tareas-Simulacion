@@ -1,0 +1,4 @@
+Time(Hours);EntityID;ObjectName;ProcessID;StepName;Action
+0,0670455815262185;ModelEntity1.96;Input@Sink1;4.TransferFailureLogic;[Notify] DestroyingEntity;Entity 'ModelEntity1.96' failed to initiate transfer from node.
+0,0670455815262185;ModelEntity1.96;Input@Sink1;4.TransferFailureLogic;[Notify] DestroyingEntity;Entity 'ModelEntity1.96' failed to initiate transfer from node 'Input@Sink1' onto an outbound link. The entity is being automatically destroyed. However, this warning may indicate a problem in the modeled logic. 
+

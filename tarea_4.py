@@ -1,5 +1,6 @@
 from random import expovariate, uniform
 from numpy import random
+from math import sqrt
 
 
 class Simulacion:
@@ -75,6 +76,43 @@ class Simulacion:
                f"Costo promedio: {self.costo_total/120}\n"
 
 
-simulacion1 = Simulacion(20, 40)
-simulacion1.run()
-print(simulacion1)
+# Primera técnica: comparación de a pares
+
+def replica_conjunta(conjunto):
+    zetas = []
+    politica_base = conjunto[1]
+    simulacion_base = Simulacion(*politica_base)
+    simulacion_base.run()
+    prom_base = simulacion_base.costo_total/120
+
+    for politica in [conjunto[0]]+conjunto[2:]:
+        simulacion_politica = Simulacion(*politica)
+        simulacion_politica.run()
+        prom_politica = simulacion_politica.costo_total/120
+
+        zetas.append(prom_politica - prom_base)
+    return zetas
+
+
+def replicas_iniciales(conjunto, replicas):
+    resultados = [replica_conjunta(conjunto) for _ in range(replicas)]
+    por_politica = list(zip(*resultados))
+    promedios = [sum(x)/len(x) for x in por_politica]
+    restas = []
+    for i in range(replicas):
+        restas.append([((por_politica[j][i] - promedios[j])**2)/(replicas-1)
+                       for j in range(6)])
+    varianzas = [sum(x) for x in zip(*restas)]
+    return promedios, varianzas
+
+
+def intervalos(conjunto, replicas):
+    promedios, varianzas = replicas_iniciales(conjunto, replicas)
+    for prom, s2 in zip(promedios, varianzas):
+        print([prom - 2.97 * sqrt(s2/replicas), prom + 2.97 * sqrt(s2/replicas)])
+
+
+politicas = [(20, 40), (20, 50), (20, 60), (20, 70),
+             (20, 80), (25, 60), (25, 70)]
+
+intervalos(politicas, 100)
